@@ -13,8 +13,6 @@ class Card:
         self.leftTopCornerY = 0
         self.prevLeftTopCornerX = 0
         self.prevLeftTopCornerY = 0
-        self.centerX = 0
-        self.centerY = 0
         self.selected = False
         self.prevCol = None
         self.col = 0
@@ -26,6 +24,10 @@ class CardGroup:
     def __init__(self, cards):
         self.cards = cards
         self.selected = False
+        self.leftTopCornerX = 0
+        self.leftTopCornerY = 0
+        self.prevLeftTopCornerX = 0
+        self.prevLeftTopCornerY = 0
     
     def __repr__(self):
         return f'{self.cards}'
@@ -96,12 +98,11 @@ def onAppStart(app):
                     app.eightHearts, app.nineHearts, app.tenHearts, app.jackHearts, app.queenHearts, app.kingHearts, app.aceDiamonds,
                     app.twoDiamonds, app.threeDiamonds, app.fourDiamonds, app.fiveDiamonds, app.sixDiamonds, app.sevenDiamonds,
                     app.eightDiamonds, app.nineDiamonds, app.tenDiamonds, app.jackDiamonds, app.queenDiamonds, app.kingDiamonds]
-    random.shuffle(app.cardDeck)
+    random.shuffle(app.cardDeck) # write custom shuffle function
     app.initialTableau = app.cardDeck[:29]
     app.stack = app.cardDeck[29:]
     app.drawnStack = []
     app.colBounds = [(150, 246), (325, 421), (500, 596), (675, 771), (850, 946), (1025, 1121), (1200, 1296)]
-    app.frontCards = []
     app.orderedStacks = [ [] for i in range(4) ]
 
     app.tableau = []
@@ -122,8 +123,6 @@ def initialSetup(app):
         for card in range(cols+1):
             app.initialTableau[cardCount].leftTopCornerX = (startX%1225)+150
             app.initialTableau[cardCount].leftTopCornerY = (cardInd*55)+285
-            app.initialTableau[cardCount].centerX = app.initialTableau[cardCount].leftTopCornerX + 48
-            app.initialTableau[cardCount].centerY = app.initialTableau[cardCount].leftTopCornerY + 65.5
             app.initialTableau[cardCount].col = cols
             colCards.append(app.initialTableau[cardCount])
             cardCount += 1
@@ -185,12 +184,14 @@ def getCard(app, mouseX, mouseY):
                 startX = card.leftTopCornerX 
                 startY = card.leftTopCornerY
                 endX = card.leftTopCornerX + 96
-                endY = card.leftTopCornerY + 131
+                endY = card.leftTopCornerY + 55
                 if mouseX >= startX and mouseX <= endX and mouseY >= startY and mouseY <= endY:
                     if cardInd+1 == len(app.tableau[col]):
                         return card
                     else:
-                        app.cardGroup = CardGroup(app.tableau[col][cardInd:]) 
+                        app.cardGroup = CardGroup(app.tableau[col][cardInd:])
+                        app.cardGroup.leftTopCornerX = app.tableau[col][cardInd].leftTopCornerX
+                        app.cardGroup.leftTopCornerY = app.tableau[col][cardInd].leftTopCornerY
                         return app.cardGroup
             cardInd += 1
     return None
@@ -203,62 +204,121 @@ def deselectPrevCard(app):
             for card in app.tableau[col]:
                 if card.selected:
                     card.selected = False
+                    card.prevLeftTopCornerX = 0
+                    card.prevLeftTopCornerY = 0
 
 def onMousePress(app, mouseX, mouseY):
     deselectPrevCard(app)
     card = getCard(app, mouseX, mouseY)
     if card != None:
         card.selected = True
+        card.prevLeftTopCornerX = card.leftTopCornerX
+        card.prevLeftTopCornerY = card.leftTopCornerY
+    if app.cardGroup != None:
+        for cd in card.cards:
+            cd.prevLeftTopCornerX = cd.leftTopCornerX
+            cd.prevLeftTopCornerY = cd.leftTopCornerY
 
 def onMouseDrag(app, mouseX, mouseY): 
     if app.cardGroup != None:
-        midCard = len(app.cardGroup.cards) // 2
         cardInd = 0
         for card in app.cardGroup.cards:
-            if cardInd <= midCard:
-                card.leftTopCornerX = mouseX - 48
-                card.leftTopCornerY = mouseY - (((midCard+1) - cardInd)*55)
-            else:
-                card.leftTopCornerX = mouseX - 48
-                card.leftTopCornerY = mouseY + ((cardInd-(midCard+1))*55)
+            if cardInd == 0:
+                app.cardGroup.leftTopCornerX = mouseX - 48
+                app.cardGroup.leftTopCornerY = mouseY + (cardInd*55)
+            card.leftTopCornerX = mouseX - 48
+            card.leftTopCornerY = mouseY + (cardInd*55)
             cardInd += 1
     else:
         for col in range(7):
             for card in app.tableau[col]:
                 if card.selected:
-                    card.centerX = mouseX
-                    card.centerY = mouseY
-                    card.leftTopCornerX = card.centerX - 48
-                    card.leftTopCornerY = card.centerY - 65.5
+                    card.leftTopCornerX = mouseX - 48
+                    card.leftTopCornerY = mouseY - 65.5
 
-def onMouseRelease(app, mouseX, mouseY):
+def onMouseRelease(app, mouseX, mouseY): 
     if app.cardGroup != None:
         for col in range(7):
             for card in app.tableau[col]:
                 if card == app.cardGroup.cards[0]:
-                    for i in range(len(app.cardGroup.cards)):
-                        app.tableau[col].pop()
-        colInd = 0
-        for (x1, x2) in app.colBounds:
-            if mouseX >= x1 and mouseX <= x2:
-                for card in app.cardGroup.cards:
-                    app.tableau[colInd].append(card)
-                    card.leftTopCornerX = x1
-                    card.leftTopCornerY = (len(app.tableau[colInd])-1)*55 + 285
-            colInd += 1
+                        colInd = 0
+                        for (x1, x2) in app.colBounds:
+                            if mouseX >= x1 and mouseX <= x2:
+                                if checkGroupTableauLegality(app, app.cardGroup.cards, colInd) == True: 
+                                    #for num in range(len(app.cardGroup.cards)):
+                                    #    app.tableau[col].pop()
+                                    for card in app.cardGroup.cards:
+                                        app.tableau[col].pop()
+                                        app.tableau[colInd].append(card)
+                                        card.leftTopCornerX = x1
+                                        card.leftTopCornerY = (len(app.tableau[colInd])-1)*55 + 285
+                                else:
+                                    app.cardGroup.leftTopCornerX = app.cardGroup.prevLeftTopCornerX
+                                    app.cardGroup.leftTopCornerY = app.cardGroup.prevLeftTopCornerX 
+                                    for cd in app.cardGroup.cards:
+                                        cd.leftTopCornerX = cd.prevLeftTopCornerX
+                                        cd.leftTopCornerY = cd.prevLeftTopCornerY
+                            colInd += 1
     else:
         for col in range(7):
             for card in app.tableau[col]:
                 if card.selected == True:
-                    app.tableau[col].pop()
                     colInd = 0
                     for (x1, x2) in app.colBounds:
-                        if mouseX >= x1 and mouseX <= x2:
-                            app.tableau[colInd].append(card)
-                            card.leftTopCornerX = x1
-                            card.leftTopCornerY = (len(app.tableau[colInd])-1)*55 + 285
+                        if mouseX >= x1 and mouseX <= x2: # 4 rects
+                            if colInd < 4 and mouseY < 285:
+                                if checkFourRectsLegality(app, card, colInd):
+                                    app.tableau[col].pop()
+                                    app.orderedStacks[colInd].append(card)
+                                    card.leftTopCornerX = x1
+                                    card.leftTopCornerY = 100
+                                else:
+                                    card.leftTopCornerX = card.prevLeftTopCornerX
+                                    card.leftTopCornerY = card.prevLeftTopCornerY
+                            else: # tableau
+                                if checkSingleTableauLegality(app, card, colInd) == True:
+                                    app.tableau[col].pop()
+                                    app.tableau[colInd].append(card)
+                                    card.leftTopCornerX = x1
+                                    card.leftTopCornerY = (len(app.tableau[colInd])-1)*55 + 285
+                                else:
+                                    card.leftTopCornerX = card.prevLeftTopCornerX
+                                    card.leftTopCornerY = card.prevLeftTopCornerY
                         colInd += 1
-    # legality check
+
+def checkSingleTableauLegality(app, card, colInd):
+    if len(app.tableau[colInd]) == 0:
+        if card.number == 13:
+            return True
+        return False
+    elif (app.tableau[colInd][-1].number == card.number and app.tableau[colInd][-1].suite == card.suite):
+        return True
+    elif (app.tableau[colInd][-1].color != card.color) and (app.tableau[colInd][-1].number == (card.number+1)):
+        return True
+    else:
+        return False
+
+def checkGroupTableauLegality(app, card, colInd):
+    if len(app.tableau[colInd]) == 0:
+        if card[0].number == 13:
+            return True
+        return False
+    elif (app.tableau[colInd][-1].color != card[0].color) and (app.tableau[colInd][-1].number == (card[0].number+1)):
+        print('true', app.tableau[colInd][-1], card[0])
+        return True
+    else:
+        print('false', app.tableau[colInd][-1], card[0])
+        return False
+
+def checkFourRectsLegality(app, card, colInd):
+    if len(app.orderedStacks[colInd]) == 0:
+        if card.number == 1:
+            return True
+        return False
+    elif (app.orderedStacks[colInd][-1].suite == card.suite and app.orderedStacks[colInd][-1].number == (card.number-1)):
+        return True
+    else:
+        return False
 
 def main():
     runApp(width=2880, height=1800)
