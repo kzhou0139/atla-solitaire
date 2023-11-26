@@ -167,6 +167,12 @@ def drawBoard(app):
     drawLabel(f'Time: {app.timer}', 720, 30, size=16, font='monospace', bold=True)
     drawLabel(f'Moves: {app.moves}', 1000, 30, size=16, font='monospace', bold=True)
 
+    # bottom buttons
+    drawRect(150, 750, 95, 50, fill='lightSteelBlue', border='black')
+    drawRect(275, 750, 95, 50, fill='lightSteelBlue', border='black')
+    drawLabel('Undo Move', 197.5, 775, fill='black', size=14)
+    drawLabel('Hint', 322.5, 775, fill='black', size=14)
+
 def redrawAll(app):
     drawImage('/Users/kellyzhou/atla-solitaire/backgrounds/3.png', 0, 0)
     drawBoard(app)
@@ -211,10 +217,10 @@ def onMouseDrag(app, mouseX, mouseY):
         for card in app.cardGroup.cards:
             if cardInd <= midCard:
                 card.leftTopCornerX = mouseX - 48
-                card.leftTopCornerY = mouseY - (((midCard+1) - cardInd)*65.5)
+                card.leftTopCornerY = mouseY - (((midCard+1) - cardInd)*55)
             else:
                 card.leftTopCornerX = mouseX - 48
-                card.leftTopCornerY = mouseY + ((cardInd-(midCard+1))*65.5)
+                card.leftTopCornerY = mouseY + ((cardInd-(midCard+1))*55)
             cardInd += 1
     else:
         for col in range(7):
@@ -237,6 +243,8 @@ def onMouseRelease(app, mouseX, mouseY):
             if mouseX >= x1 and mouseX <= x2:
                 for card in app.cardGroup.cards:
                     app.tableau[colInd].append(card)
+                    card.leftTopCornerX = x1
+                    card.leftTopCornerY = (len(app.tableau[colInd])-1)*55 + 285
             colInd += 1
     else:
         for col in range(7):
@@ -247,6 +255,8 @@ def onMouseRelease(app, mouseX, mouseY):
                     for (x1, x2) in app.colBounds:
                         if mouseX >= x1 and mouseX <= x2:
                             app.tableau[colInd].append(card)
+                            card.leftTopCornerX = x1
+                            card.leftTopCornerY = (len(app.tableau[colInd])-1)*55 + 285
                         colInd += 1
     # legality check
 
