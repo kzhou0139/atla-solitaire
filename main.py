@@ -226,14 +226,6 @@ def resetStack(app):
 def deselectPrevCard(app):
     if app.cardGroup != None: 
         app.cardGroup = None
-    elif app.selectedCardInStack == True:
-        app.selectedCardInStack = False
-        for col in range(4):
-            for card in app.orderedStacks[col]:
-                if card.selected:
-                    card.selected = False
-                    card.prevLeftTopCornerX = 0
-                    card.prevLeftTopCornerY = 0
     else:
         for col in range(7):
             for card in app.tableau[col]:
@@ -241,6 +233,15 @@ def deselectPrevCard(app):
                     card.selected = False
                     card.prevLeftTopCornerX = 0
                     card.prevLeftTopCornerY = 0
+
+    if app.selectedCardInStack == True:
+        app.selectedCardInStack = False
+    for col in range(4): # different stacks
+        for card in app.orderedStacks[col]:
+            if card.selected:
+                card.selected = False
+                card.prevLeftTopCornerX = 0
+                card.prevLeftTopCornerY = 0
 
 def onMousePress(app, mouseX, mouseY):
     deselectPrevCard(app)
@@ -275,7 +276,6 @@ def onMouseDrag(app, mouseX, mouseY): # ***work on moving card from 4 rects to t
     elif app.selectedCardInStack == True:
         app.drawnStack[-1].leftTopCornerX = mouseX - 48
         app.drawnStack[-1].leftTopCornerY = mouseY - 65.5
-        print(app.drawnStack[-1].leftTopCornerX, app.drawnStack[-1].leftTopCornerY)
     else:
         for col in range(7):
             for card in app.tableau[col]:
@@ -364,8 +364,8 @@ def checkSingleTableauLegality(app, card, colInd):
         if card.number == 13:
             return True
         return False
-    #elif (app.tableau[colInd][-1].number == card.number and app.tableau[colInd][-1].suite == card.suite):
-     #   return True
+    elif (app.tableau[colInd][-1].number == card.number and app.tableau[colInd][-1].suite == card.suite):
+        return True
     elif (app.tableau[colInd][-1].color != card.color) and (app.tableau[colInd][-1].number == (card.number+1)):
         print('true', app.tableau[colInd][-1], card)
         return True
