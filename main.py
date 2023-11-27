@@ -102,6 +102,7 @@ def onAppStart(app):
     app.initialTableau = app.cardDeck[:29]
     app.stack = app.cardDeck[29:]
     app.drawnStack = []
+    app.selectedCardInStack = False
     app.colBounds = [(150, 246), (325, 421), (500, 596), (675, 771), (850, 946), (1025, 1121), (1200, 1296)]
     app.orderedStacks = [ [] for i in range(4) ]
 
@@ -128,7 +129,11 @@ def initialSetup(app):
             cardCount += 1
             cardInd += 1
         startX += 175
-        app.tableau.append(colCards)    
+        app.tableau.append(colCards)   
+
+    for card in app.stack:
+        card.leftTopCornerX = 1200
+        card.leftTopCornerY = 100 
 
 def drawBoard(app):
     startX = 0
@@ -154,11 +159,11 @@ def drawBoard(app):
         xLoc += 175
 
     # stack
+    drawRect(1025, 100, 96, 131, fill=None, border='black', borderWidth=1.5)
     for card in app.stack:
         drawImage(card.back, 1200, 100)
-    drawRect(1025, 100, 96, 131, fill=None, border='black', borderWidth=1.5)
     for card in app.drawnStack:
-        drawImage(card.image, 1025, 100)
+        drawImage(card.image, card.leftTopCornerX, card.leftTopCornerY)
 
     # banner
     drawRect(0, 0, 2880, 60, fill='navy', opacity=20)
@@ -177,7 +182,7 @@ def redrawAll(app):
     drawBoard(app)
 
 def getCard(app, mouseX, mouseY):
-    for col in range(7):
+    for col in range(7): # tableau
         cardInd = 0
         for card in app.tableau[col]:
             if card.showBack == False:
@@ -194,11 +199,41 @@ def getCard(app, mouseX, mouseY):
                         app.cardGroup.leftTopCornerY = app.tableau[col][cardInd].leftTopCornerY
                         return app.cardGroup
             cardInd += 1
+
+    if (mouseX >= 1200 and mouseX <= 1296 and mouseY >= 100 and mouseY <= 231): # stack
+        if len(app.stack) == 0:
+            resetStack(app)
+        else:
+            app.selectedCardInStack = True
+            return app.stack[-1]
+    if (mouseX >= 1025 and mouseX <= 1121 and mouseY >= 100 and mouseY <= 231): # drawn stack
+        if len(app.drawnStack) != 0:
+            app.selectedCardInStack = True
+            return app.drawnStack[-1]
     return None
+
+def resetStack(app):
+    for card in app.drawnStack:
+        card.selected = False
+        card.showBack = True
+        card.leftTopCornerX = 1200
+        card.leftTopCornerY = 100
+        app.stack.append(card)
+    app.drawnStack = []
+    print(app.stack)
+    print(app.drawnStack)
 
 def deselectPrevCard(app):
     if app.cardGroup != None: 
         app.cardGroup = None
+    elif app.selectedCardInStack == True:
+        app.selectedCardInStack = False
+        for col in range(4):
+            for card in app.orderedStacks[col]:
+                if card.selected:
+                    card.selected = False
+                    card.prevLeftTopCornerX = 0
+                    card.prevLeftTopCornerY = 0
     else:
         for col in range(7):
             for card in app.tableau[col]:
@@ -218,8 +253,16 @@ def onMousePress(app, mouseX, mouseY):
         for cd in card.cards:
             cd.prevLeftTopCornerX = cd.leftTopCornerX
             cd.prevLeftTopCornerY = cd.leftTopCornerY
+    if card in app.stack:
+        card.leftTopCornerX = 1025
+        card.leftTopCornerY = 100
+        card.prevLeftTopCornerX = 1025
+        card.prevLeftTopCornerY = 100
+        card.showBack = False
+        app.drawnStack.append(card)
+        app.stack.pop()
 
-def onMouseDrag(app, mouseX, mouseY): 
+def onMouseDrag(app, mouseX, mouseY): # ***work on moving card from 4 rects to tableau***
     if app.cardGroup != None:
         cardInd = 0
         for card in app.cardGroup.cards:
@@ -229,6 +272,10 @@ def onMouseDrag(app, mouseX, mouseY):
             card.leftTopCornerX = mouseX - 48
             card.leftTopCornerY = mouseY + (cardInd*55)
             cardInd += 1
+    elif app.selectedCardInStack == True:
+        app.drawnStack[-1].leftTopCornerX = mouseX - 48
+        app.drawnStack[-1].leftTopCornerY = mouseY - 65.5
+        print(app.drawnStack[-1].leftTopCornerX, app.drawnStack[-1].leftTopCornerY)
     else:
         for col in range(7):
             for card in app.tableau[col]:
@@ -259,13 +306,37 @@ def onMouseRelease(app, mouseX, mouseY):
                                         cd.leftTopCornerY = cd.prevLeftTopCornerY
                                     return
                             colInd += 1
+    elif app.selectedCardInStack == True:
+        colInd = 0
+        card = app.drawnStack[-1]
+        for (x1, x2) in app.colBounds:
+            if mouseX >= x1 and mouseX <= x2 and mouseY < 285 and colInd < 4: # move to 4 rects
+                if checkFourRectsLegality(app, card, colInd):
+                    app.drawnStack.pop()
+                    app.orderedStacks[colInd].append(card)
+                    card.leftTopCornerX = x1
+                    card.leftTopCornerY = 100
+                    print('selected', card.selected)
+                else:
+                    card.leftTopCornerX = card.prevLeftTopCornerX
+                    card.leftTopCornerY = card.prevLeftTopCornerY
+            elif mouseX >= x1 and mouseX <= x2 and mouseY >= 285: # move to tableau
+                if checkSingleTableauLegality(app, card, colInd) == True:
+                    app.drawnStack.pop()
+                    app.tableau[colInd].append(card)
+                    card.leftTopCornerX = x1
+                    card.leftTopCornerY = (len(app.tableau[colInd])-1)*55 + 285
+                else:
+                    card.leftTopCornerX = card.prevLeftTopCornerX
+                    card.leftTopCornerY = card.prevLeftTopCornerY
+            colInd += 1
     else:
         for col in range(7):
             for card in app.tableau[col]:
                 if card.selected == True:
                     colInd = 0
                     for (x1, x2) in app.colBounds:
-                        if mouseX >= x1 and mouseX <= x2: # 4 rects
+                        if mouseX >= x1 and mouseX <= x2: # 4 rects 
                             if colInd < 4 and mouseY < 285:
                                 if checkFourRectsLegality(app, card, colInd):
                                     app.tableau[col].pop()
