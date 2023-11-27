@@ -197,7 +197,7 @@ def getCard(app, mouseX, mouseY):
     return None
 
 def deselectPrevCard(app):
-    if app.cardGroup != None:
+    if app.cardGroup != None: 
         app.cardGroup = None
     else:
         for col in range(7):
@@ -245,19 +245,19 @@ def onMouseRelease(app, mouseX, mouseY):
                         for (x1, x2) in app.colBounds:
                             if mouseX >= x1 and mouseX <= x2:
                                 if checkGroupTableauLegality(app, app.cardGroup.cards, colInd) == True: 
-                                    #for num in range(len(app.cardGroup.cards)):
-                                    #    app.tableau[col].pop()
                                     for card in app.cardGroup.cards:
                                         app.tableau[col].pop()
                                         app.tableau[colInd].append(card)
                                         card.leftTopCornerX = x1
-                                        card.leftTopCornerY = (len(app.tableau[colInd])-1)*55 + 285
+                                        card.leftTopCornerY = (len(app.tableau[colInd])-1)*55 + 285 #magic nunbers?
+                                    return
                                 else:
                                     app.cardGroup.leftTopCornerX = app.cardGroup.prevLeftTopCornerX
                                     app.cardGroup.leftTopCornerY = app.cardGroup.prevLeftTopCornerX 
                                     for cd in app.cardGroup.cards:
                                         cd.leftTopCornerX = cd.prevLeftTopCornerX
                                         cd.leftTopCornerY = cd.prevLeftTopCornerY
+                                    return
                             colInd += 1
     else:
         for col in range(7):
@@ -275,6 +275,7 @@ def onMouseRelease(app, mouseX, mouseY):
                                 else:
                                     card.leftTopCornerX = card.prevLeftTopCornerX
                                     card.leftTopCornerY = card.prevLeftTopCornerY
+                                return
                             else: # tableau
                                 if checkSingleTableauLegality(app, card, colInd) == True:
                                     app.tableau[col].pop()
@@ -284,6 +285,7 @@ def onMouseRelease(app, mouseX, mouseY):
                                 else:
                                     card.leftTopCornerX = card.prevLeftTopCornerX
                                     card.leftTopCornerY = card.prevLeftTopCornerY
+                                return
                         colInd += 1
 
 def checkSingleTableauLegality(app, card, colInd):
@@ -291,14 +293,18 @@ def checkSingleTableauLegality(app, card, colInd):
         if card.number == 13:
             return True
         return False
-    elif (app.tableau[colInd][-1].number == card.number and app.tableau[colInd][-1].suite == card.suite):
-        return True
+    #elif (app.tableau[colInd][-1].number == card.number and app.tableau[colInd][-1].suite == card.suite):
+     #   return True
     elif (app.tableau[colInd][-1].color != card.color) and (app.tableau[colInd][-1].number == (card.number+1)):
+        print('true', app.tableau[colInd][-1], card)
         return True
     else:
+        print('false', app.tableau[colInd][-1], card)
         return False
 
 def checkGroupTableauLegality(app, card, colInd):
+    print(card)
+    print(app.tableau[colInd])
     if len(app.tableau[colInd]) == 0:
         if card[0].number == 13:
             return True
