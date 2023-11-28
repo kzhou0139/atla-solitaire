@@ -246,7 +246,7 @@ def resetStack(app):
     app.drawnStack = []
 
 def deselectPrevCard(app):
-    if app.cardGroup != None: 
+    '''if app.cardGroup != None: 
         app.cardGroup = None
     else:
         for col in range(7):
@@ -261,9 +261,31 @@ def deselectPrevCard(app):
         for card in app.drawnStack:
             if card.selected == True:
                 card.selected = False
+                card.prevLeftTopCornerX = 0
+                card.prevLeftTopCornerY = 0
     if app.selectedCardInOrderedStack == True:
         app.selectedCardInOrderedStack = False
         for col in range(4): 
+            for card in app.orderedStacks[col]:
+                if card.selected == True:
+                    card.selected = False
+                    card.prevLeftTopCornerX = 0
+                    card.prevLeftTopCornerY = 0'''
+    app.cardGroup = None
+    app.selectedCardInStack = False
+    app.selectedCardInOrderedStack = False
+    for col in range(7):
+            for card in app.tableau[col]:
+                if card.selected:
+                    card.selected = False
+                    card.prevLeftTopCornerX = 0
+                    card.prevLeftTopCornerY = 0
+    for card in app.drawnStack:
+            if card.selected == True:
+                card.selected = False
+                card.prevLeftTopCornerX = 0
+                card.prevLeftTopCornerY = 0
+    for col in range(4): 
             for card in app.orderedStacks[col]:
                 if card.selected == True:
                     card.selected = False
@@ -281,6 +303,7 @@ def onMousePress(app, mouseX, mouseY):
         card.prevLeftTopCornerY = card.leftTopCornerY
     if app.cardGroup != None:
         for cd in card.cards:
+            cd.selected = True
             cd.prevLeftTopCornerX = cd.leftTopCornerX
             cd.prevLeftTopCornerY = cd.leftTopCornerY
     if card in app.stack:
@@ -450,14 +473,7 @@ def getHint(app):
     pass
 
 def undoMove(app):
-    if app.singleCardSelected != None:
-        pass
-    elif app.cardGroup != None:
-        pass
-    elif app.selectedCardInOrderedStack != None:
-        pass
-    elif app.selectedCardInTableau != None:
-        pass
+    pass
 
 def main():
     runApp(width=2880, height=1800)
