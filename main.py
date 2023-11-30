@@ -477,17 +477,12 @@ def getHint(app): # returns [] if nothing, draw card if stack not empty
         possMoveList.extend(stackHints)
     if foundationHints != []:
         possMoveList.extend(foundationHints)
+    if possMoveList == [] and (len(app.stack) != 0 or len(app.drawnStack != 0)):
+        possMoveList.append('Draw card')
+    if possMoveList == [] and len(app.stack) == 0 and len(app.drawnStack == 0):
+        possMoveList.append('No moves left')
     print(possMoveList)
     return possMoveList
-
-# if tableau col empty, can move king. done
-# if tableau ace, can move to foundation. done
-# tableau -> foundation. done
-# drawn card -> foundation. done
-# drawn card -> tableau. done
-# foundation -> tableau
-# draw card
-# no moves left
 
 def getTableauHints(app): # need to check if redundancy checker works
     hints = []
@@ -502,11 +497,11 @@ def getTableauHints(app): # need to check if redundancy checker works
                     if cardInd != (len(app.tableau[col]) - 1): # group
                         hintStr = f'Move the {card.number} of {card.suite} group to col {possMove}'
                     else: # single
-                        if (cardInd > 0) and app.tableau[possMove][-1] == app.tableau[col][cardInd-1]: # if move is redundant (Q, J -> Q, J)
-                           print('redundant')
-                           continue
                         hintStr = f'Move the {card.number} of {card.suite} to col {possMove}'
                     hints.append(hintStr)
+                    if (cardInd > 0) and (app.tableau[possMove][-1].number == app.tableau[col][cardInd-1].number): # if move is redundant (Q, J -> Q, J)
+                        print('redundant')
+                        hints.pop()
             if (card.showBack == False) and (card.number == 13): # if king
                 possMove = findEmptyCol(app)
                 if possMove != None:
