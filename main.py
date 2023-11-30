@@ -33,76 +33,11 @@ class CardGroup:
         return f'{self.cards}'
 
 def onAppStart(app):
-    '''# spades
-    app.aceSpades = Card(1, 'spades', 'black', '/Users/kellyzhou/atla-solitaire/cards/aceSpades.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.twoSpades = Card(2, 'spades', 'black', '/Users/kellyzhou/atla-solitaire/cards/twoSpades.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.threeSpades = Card(3, 'spades', 'black', '/Users/kellyzhou/atla-solitaire/cards/threeSpades.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.fourSpades = Card(4, 'spades', 'black', '/Users/kellyzhou/atla-solitaire/cards/fourSpades.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.fiveSpades = Card(5, 'spades', 'black', '/Users/kellyzhou/atla-solitaire/cards/fiveSpades.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.sixSpades = Card(6, 'spades', 'black', '/Users/kellyzhou/atla-solitaire/cards/sixSpades.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.sevenSpades = Card(7, 'spades', 'black', '/Users/kellyzhou/atla-solitaire/cards/sevenSpades.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.eightSpades = Card(8, 'spades', 'black', '/Users/kellyzhou/atla-solitaire/cards/eightSpades.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.nineSpades = Card(9, 'spades', 'black', '/Users/kellyzhou/atla-solitaire/cards/nineSpades.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.tenSpades = Card(10, 'spades', 'black', '/Users/kellyzhou/atla-solitaire/cards/tenSpades.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.jackSpades = Card(11, 'spades', 'black', '/Users/kellyzhou/atla-solitaire/cards/jackSpades.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.queenSpades = Card(12, 'spades', 'black', '/Users/kellyzhou/atla-solitaire/cards/queenSpades.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.kingSpades = Card(13, 'spades', 'black', '/Users/kellyzhou/atla-solitaire/cards/kingSpades.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    # clubs
-    app.aceClubs = Card(1, 'clubs', 'black', '/Users/kellyzhou/atla-solitaire/cards/aceClubs.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.twoClubs = Card(2, 'clubs', 'black', '/Users/kellyzhou/atla-solitaire/cards/twoClubs.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.threeClubs = Card(3, 'clubs', 'black', '/Users/kellyzhou/atla-solitaire/cards/threeClubs.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.fourClubs = Card(4, 'clubs', 'black', '/Users/kellyzhou/atla-solitaire/cards/fourClubs.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.fiveClubs = Card(5, 'clubs', 'black', '/Users/kellyzhou/atla-solitaire/cards/fiveClubs.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.sixClubs = Card(6, 'clubs', 'black', '/Users/kellyzhou/atla-solitaire/cards/sixClubs.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.sevenClubs = Card(7, 'clubs', 'black', '/Users/kellyzhou/atla-solitaire/cards/sevenClubs.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.eightClubs = Card(8, 'clubs', 'black', '/Users/kellyzhou/atla-solitaire/cards/eightClubs.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.nineClubs = Card(9, 'clubs', 'black', '/Users/kellyzhou/atla-solitaire/cards/nineClubs.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.tenClubs = Card(10, 'clubs', 'black', '/Users/kellyzhou/atla-solitaire/cards/tenClubs.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.jackClubs = Card(11, 'clubs', 'black', '/Users/kellyzhou/atla-solitaire/cards/jackClubs.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.queenClubs = Card(12, 'clubs', 'black', '/Users/kellyzhou/atla-solitaire/cards/queenClubs.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.kingClubs = Card(13, 'clubs', 'black', '/Users/kellyzhou/atla-solitaire/cards/kingClubs.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    # hearts
-    app.aceHearts = Card(1, 'hearts', 'red', '/Users/kellyzhou/atla-solitaire/cards/aceHearts.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.twoHearts = Card(2, 'hearts', 'red', '/Users/kellyzhou/atla-solitaire/cards/twoHearts.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.threeHearts = Card(3, 'hearts','red', '/Users/kellyzhou/atla-solitaire/cards/threeHearts.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.fourHearts = Card(4, 'hearts', 'red', '/Users/kellyzhou/atla-solitaire/cards/fourHearts.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.fiveHearts = Card(5, 'hearts', 'red', '/Users/kellyzhou/atla-solitaire/cards/fiveHearts.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.sixHearts = Card(6, 'hearts', 'red', '/Users/kellyzhou/atla-solitaire/cards/sixHearts.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.sevenHearts = Card(7, 'hearts', 'red', '/Users/kellyzhou/atla-solitaire/cards/sevenHearts.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.eightHearts = Card(8, 'hearts', 'red', '/Users/kellyzhou/atla-solitaire/cards/eightHearts.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.nineHearts = Card(9, 'hearts', 'red', '/Users/kellyzhou/atla-solitaire/cards/nineHearts.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.tenHearts = Card(10, 'hearts', 'red', '/Users/kellyzhou/atla-solitaire/cards/tenHearts.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.jackHearts = Card(11, 'hearts', 'red', '/Users/kellyzhou/atla-solitaire/cards/jackHearts.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.queenHearts = Card(12, 'hearts', 'red', '/Users/kellyzhou/atla-solitaire/cards/queenHearts.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.kingHearts = Card(13, 'hearts', 'red', '/Users/kellyzhou/atla-solitaire/cards/kingHearts.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    # diamonds
-    app.aceDiamonds = Card(1, 'diamonds', 'red', '/Users/kellyzhou/atla-solitaire/cards/aceDiamonds.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.twoDiamonds = Card(2, 'diamonds', 'red', '/Users/kellyzhou/atla-solitaire/cards/twoDiamonds.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.threeDiamonds = Card(3, 'diamonds', 'red', '/Users/kellyzhou/atla-solitaire/cards/threeDiamonds.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.fourDiamonds = Card(4, 'diamonds', 'red', '/Users/kellyzhou/atla-solitaire/cards/fourDiamonds.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.fiveDiamonds = Card(5, 'diamonds', 'red', '/Users/kellyzhou/atla-solitaire/cards/fiveDiamonds.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.sixDiamonds = Card(6, 'diamonds', 'red', '/Users/kellyzhou/atla-solitaire/cards/sixDiamonds.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.sevenDiamonds = Card(7, 'diamonds', 'red', '/Users/kellyzhou/atla-solitaire/cards/sevenDiamonds.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.eightDiamonds = Card(8, 'diamonds', 'red', '/Users/kellyzhou/atla-solitaire/cards/eightDiamonds.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.nineDiamonds = Card(9, 'diamonds', 'red', '/Users/kellyzhou/atla-solitaire/cards/nineDiamonds.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.tenDiamonds = Card(10, 'diamonds', 'red', '/Users/kellyzhou/atla-solitaire/cards/tenDiamonds.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.jackDiamonds = Card(11, 'diamonds', 'red', '/Users/kellyzhou/atla-solitaire/cards/jackDiamonds.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.queenDiamonds = Card(12, 'diamonds', 'red', '/Users/kellyzhou/atla-solitaire/cards/queenDiamonds.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')
-    app.kingDiamonds = Card(13, 'diamonds', 'red', '/Users/kellyzhou/atla-solitaire/cards/kingDiamonds.png', '/Users/kellyzhou/atla-solitaire/cards/back.png')'''
-    #app.cardDeck = [app.aceSpades, app.twoSpades, app.threeSpades, app.fourSpades, app.fiveSpades, app.sixSpades,
-                    #app.sevenSpades, app.eightSpades, app.nineSpades, app.tenSpades, app.jackSpades, app.queenSpades,
-                    #app.kingSpades, app.aceClubs, app.twoClubs, app.threeClubs, app.fourClubs, app.fiveClubs, app.sixClubs,
-                    #app.sevenClubs, app.eightClubs, app.nineClubs, app.tenClubs, app.jackClubs, app.queenClubs, app.kingClubs,
-                    #app.aceHearts, app.twoHearts, app.threeHearts, app.fourHearts, app.fiveHearts, app.sixHearts, app.sevenHearts,
-                    #app.eightHearts, app.nineHearts, app.tenHearts, app.jackHearts, app.queenHearts, app.kingHearts, app.aceDiamonds,
-                    #app.twoDiamonds, app.threeDiamonds, app.fourDiamonds, app.fiveDiamonds, app.sixDiamonds, app.sevenDiamonds,
-                    #app.eightDiamonds, app.nineDiamonds, app.tenDiamonds, app.jackDiamonds, app.queenDiamonds, app.kingDiamonds]
-    
     app.cardDeck = []
     file = open('cards.txt', 'r')
     app.cardDeck = getCardDeck(app, file)
 
-    random.shuffle(app.cardDeck) # write custom shuffle function
+    random.shuffle(app.cardDeck) 
     app.initialTableau = app.cardDeck[:28]
     app.stack = app.cardDeck[28:]
     app.drawnStack = []
@@ -116,9 +51,9 @@ def onAppStart(app):
 
     app.cardGroup = None
 
-    app.singleCardSelected = False # implement
+    '''app.singleCardSelected = False # implement
     app.selectedCardInTableau = False # implement
-    app.selectedCardInFoundation = False # implement
+    app.selectedCardInFoundation = False # implement'''
 
     app.hintLabel = ''
     app.score = 0
@@ -479,10 +414,10 @@ def checkSingleTableauLegality(app, card, colInd):
     elif (app.tableau[colInd][-1].number == card.number and app.tableau[colInd][-1].suite == card.suite): # comment out
         return True
     elif (app.tableau[colInd][-1].color != card.color) and (app.tableau[colInd][-1].number == (card.number+1)):
-        print('true', app.tableau[colInd][-1], card)
+        #print('true', app.tableau[colInd][-1], card)
         return True
     else:
-        print('false', app.tableau[colInd][-1], card)
+        #print('false', app.tableau[colInd][-1], card)
         return False
 
 def checkGroupTableauLegality(app, card, colInd):
@@ -491,10 +426,10 @@ def checkGroupTableauLegality(app, card, colInd):
             return True
         return False
     elif (app.tableau[colInd][-1].color != card[0].color) and (app.tableau[colInd][-1].number == (card[0].number+1)):
-        print('true', app.tableau[colInd][-1], card[0])
+        #print('true', app.tableau[colInd][-1], card[0])
         return True
     else:
-        print('false', app.tableau[colInd][-1], card[0])
+        #print('false', app.tableau[colInd][-1], card[0])
         return False
 
 def checkFourRectsLegality(app, card, colInd):
@@ -507,41 +442,140 @@ def checkFourRectsLegality(app, card, colInd):
     else:
         return False
 
-def getHint(app):
+def getHint(app): # returns [] if nothing, draw card if stack not empty
     #maxNextMoves = 0
     #nextBestMove(app, maxNextMoves, bestMove)
-    possMove = None
+    '''possMoveList = []
     hintStr = 'No possible next move'
     for col in range(7):
         cardInd = 0
         for card in app.tableau[col]: # add for tableau -> foundation and foundation -> tableau. If none, then draw. 
             if card.showBack == False:
                 if cardInd != (len(app.tableau[col]) - 1): # group
-                    possMove = findCard(app, card, col)
+                    possMove = findNextCol(app, card, col)
                     if possMove != None:
-                        hintStr = f'Move the {card.number} of {card.suite} group to the {possMove.number} of {possMove.suite}'
+                        possMoveList.append(possMove)
+                        hintStr = f'Move the {card.number} of {card.suite} group to col {possMove}'
                         print(hintStr)
                         return hintStr
                 else: # single
-                    possMove = findCard(app, card, col)
+                    possMove = findNextCol(app, card, col)
                     if possMove != None:
-                        hintStr = f'Move the {card.number} of {card.suite} to the {possMove.number} of {possMove.suite}'
+                        possMoveList.append(possMove)
+                        hintStr = f'Move the {card.number} of {card.suite} to col {possMove}'
                         print(hintStr)
                         return hintStr
             cardInd += 1
-    return hintStr
+    return hintStr'''
+    possMoveList = []
+    tableauHints = getTableauHints(app)
+    stackHints = getStackHints(app)
+    foundationHints = getFoundationHints(app)
+    if tableauHints != []:
+        possMoveList.extend(tableauHints)
+    if stackHints != []:
+        possMoveList.extend(stackHints)
+    if foundationHints != []:
+        possMoveList.extend(foundationHints)
+    print(possMoveList)
+    return possMoveList
 
-def findCard(app, card, cardCol):
-    for col in range(7):
+# if tableau col empty, can move king. done
+# if tableau ace, can move to foundation. done
+# tableau -> foundation. done
+# drawn card -> foundation. done
+# drawn card -> tableau. done
+# foundation -> tableau
+# draw card
+# no moves left
+
+def getTableauHints(app): # need to check if redundancy checker works
+    hints = []
+    #hintStr = 'No possible next move'
+    for col in range(7): # moves within tableau
+        cardInd = 0
+        for card in app.tableau[col]:  
+            if (card.showBack == False) and (card.number != 13) and (card.number != 1):
+                possMove = findTableauMove(app, card, col)
+                if possMove != None:
+                    #possMoveList.append(possMove)
+                    if cardInd != (len(app.tableau[col]) - 1): # group
+                        hintStr = f'Move the {card.number} of {card.suite} group to col {possMove}'
+                    else: # single
+                        if (cardInd > 0) and app.tableau[possMove][-1] == app.tableau[col][cardInd-1]: # if move is redundant (Q, J -> Q, J)
+                           print('redundant')
+                           continue
+                        hintStr = f'Move the {card.number} of {card.suite} to col {possMove}'
+                    hints.append(hintStr)
+            if (card.showBack == False) and (card.number == 13): # if king
+                possMove = findEmptyCol(app)
+                if possMove != None:
+                    hintStr = f'Move the {card.number} of {card.suite} to col {possMove}'
+                    hints.append(hintStr)
+            if (card.showBack == False) and (card.number == 1): # if ace
+                possMove = findEmptyFoundation(app)
+                if possMove != None:
+                    hintStr = f'Move the {card.number} of {card.suite} to foundation {possMove}'
+                    hints.append(hintStr)
+            if (card.showBack == False) and (card.number != 1): # move to foundation
+                possMove = findFoundation(app, card)
+                if possMove != None:
+                    hintStr = f'Move the {card.number} of {card.suite} to foundation {possMove}'
+            cardInd += 1
+    return hints
+
+def getStackHints(app):
+    hints = []
+    if len(app.drawnStack) != 0:
+        card = app.drawnStack[-1]
+        possMove = findFoundation(app, card)
+        if possMove != None:
+            hintStr = f'Move the {card.number} of {card.suite} to foundation {possMove}'
+            hints.append(hintStr)
+        possMove = findTableauMove(app, card, -1)
+        if possMove != None:
+            hintStr = f'Move the {card.number} of {card.suite} to col {possMove}'
+            hints.append(hintStr)
+    return hints
+
+def getFoundationHints(app):
+    hints = []
+    for col in range(4):
+        if len(app.foundations[col]) > 0:
+            card = app.foundations[col][-1]
+            possMove = findTableauMove(app, card, -1)
+            if possMove != None:
+                hintStr = f'Move the {card.number} of {card.suite} to col {possMove}'
+                hints.append(hintStr)
+    return hints
+
+def findTableauMove(app, card, cardCol):
+    for col in range(7): # within tableau
         if col == cardCol:
             continue
         cardInd = 0
         for cd in app.tableau[col]:
             if ((cd.showBack == False) and (cd.color != card.color) and 
                 (cd.number == (card.number+1)) and cardInd == len(app.tableau[col])-1):
-                return cd
+                return col
             cardInd += 1
     return None
+
+def findEmptyCol(app):
+    for col in range(7):
+        if len(app.tableau[col]) == 0:
+            return col
+
+def findEmptyFoundation(app):
+    for col in range(4):
+        if len(app.foundations[col]) == 0:
+            return col
+
+def findFoundation(app, card):
+    for col in range(4):
+        if (len(app.foundations[col]) != 0 and app.foundations[col][-1].number == card.number-1 and 
+            app.foundations[col][-1].suite == card.suite):
+            return col
 
 '''def nextBestMove(app, maxNextMoves, bestMove, level=0):
     if level == 2:
@@ -551,7 +585,6 @@ def findCard(app, card, cardCol):
             for card in app.tableau[col]:
                 # find card that's face up, opp color, num+1
                 solution = solve(app, maxNextMoves, bestMove)'''
-
 
 def undoMove(app):
     pass
