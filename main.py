@@ -3,6 +3,8 @@ import random
 import copy
 import time
 
+# make winning screen
+
 class Card:
     def __init__(self, number, suite, color, image, back):
         self.number = number
@@ -476,7 +478,7 @@ def getHint(app, level):
     if foundationHints != []:
         possMoveList.extend(foundationHints)
     if possMoveList == [] and (len(app.testStack) != 0) or (len(app.testDrawnStack) != 0):
-        possMoveList.append('Draw card')
+        possMoveList.append('Draw card') # maybe remove possMoveList == [] as condition
     if possMoveList == [] and len(app.testStack) == 0 and len(app.testDrawnStack == 0):
         possMoveList.append('No moves left')
     return possMoveList
@@ -666,7 +668,7 @@ def moveFoundationToCol(app, hintList):
     cardSuite = hintList[4]
     foundCol = int(hintList[7])
     newCol = int(hintList[10])
-    for card in app.testFoundations[foundCol]:
+    for card in app.testFoundations[foundCol]: # rewrite, don't need to iterate
         if cardNum == card.number and cardSuite == card.suite:
             app.testFoundations[foundCol].pop()
             app.testTableau[newCol].append(card)
@@ -706,6 +708,130 @@ def moveStackToFoundation(app, hintList):
     card = app.testDrawnStack[-1]
     app.testDrawnStack.pop()
     app.testFoundations[foundCol].append(card)
+
+def nextBestMove2(app):
+    hints = getHint(app)
+    bestMove = nextBestMove2Helper(app, hints)
+    return bestMove
+
+def nextBestMove2Helper(app, hints, currHint, level=0):
+    if foundationsComplete(app):
+        return currHint
+    else:
+        for hint in hints:
+            if level == 0:
+                currHint = hint
+            tryMove(app, hint)
+            newHints = getHint(app)
+            solution = nextBestMove2Helper(app, newHints, currHint, level+1)
+            if solution != None:
+                return solution
+            undoTestBoard(app, hint)
+        return None # return see 1 ahead instead?
+
+def undoTestBoard(app, hint): # need to make showBack True for some
+    hintList = list(hint.split(' '))
+    if len(hintList) == 2: # draw card
+        card = app.testDrawnStack[-1]
+        app.testDrawnStack.pop()
+        app.testStack.append(card)
+    elif len(hintList) == 3:
+        pass
+    elif len(hintList) == 12:
+        undoCardGroup(app, hintList)
+    else:
+        if hintList[6] == 'foundation': # redo the indices
+            undoFoundationToCol(app, hintList)
+        elif hintList[6] == 'col' and hintList[9] == 'foundation':
+            undoColToFoundation(app, hintList)
+        elif hintList[6] == 'col' and hintList[9] == 'col':
+            undoColToCol(app, hintList)
+        elif hintList[7] == 'stack' and hintList[9] == 'col':
+            undoStackToCol(app, hintList)
+        elif hintList[6] == 'stack' and hintList[9] == 'foundation':
+            undoStackToFoundation(app, hintList)
+
+# Move the {card.number} of {card.suite} group in col {col} to col {possMove} done
+def undoCardGroup(app, hintList):
+    cardNum = int(hintList[2])
+    cardSuite = hintList[4]
+    if cardSuite == 'spades' or cardSuite == 'clubs':
+        cardColor = 'black'
+    else:
+        cardColor = 'red'
+    cardGroupCol = int(hintList[8])
+    newCol = int(hintList[11])
+    cardInd = 0
+    for card in app.testTableau[newCol]:
+        if cardNum == card.number and cardSuite == card.suite:
+            cardGroup = app.testTableau[newCol][cardInd:]
+            if ((len(app.testTableau[cardGroupCol]) > 0) and 
+                (app.testTableau[cardGroupCol][-1].number != cardNum+1 or 
+                app.testTableau[cardGroupCol][-1].color == cardColor)):
+                app.testTableau[cardGroupCol][-1].showBack = True
+            for cd in cardGroup:
+                app.testTableau[newCol].pop() # maybe incorrect
+                app.testTableau[cardGroupCol].append(cd)
+        cardInd += 1
+
+# Move the {card.number} of {card.suite} from foundation {col} to col {possMove} done
+def undoFoundationToCol(app, hintList):
+    cardNum = int(hintList[2])
+    cardSuite = hintList[4]
+    foundCol = int(hintList[7])
+    newCol = int(hintList[10])
+    card = app.testTableau[newCol][-1]
+    app.testTableau[newCol].pop()
+    app.testFoundations[foundCol].append(card)
+
+# Move the {card.number} of {card.suite} in col {col} to foundation {possMove} done
+def undoColToFoundation(app, hintList):
+    cardNum = int(hintList[2])
+    cardSuite = hintList[4]
+    if cardSuite == 'spades' or cardSuite == 'clubs':
+        cardColor = 'black'
+    else:
+        cardColor = 'red'
+    cardCol = int(hintList[7])
+    foundCol = int(hintList[10]) 
+    card = app.testFoundations[foundCol][-1]
+    app.testFoundations[foundCol].pop()
+    if ((len(app.testTableau[cardCol]) > 0) and 
+        (app.testTableau[cardCol][-1].number != cardNum+1 or 
+        app.testTableau[cardCol][-1].color == cardColor)):
+            app.testTableau[cardCol][-1].showBack = True
+    app.testTableau[cardCol].append(card)
+
+# Move the {card.number} of {card.suite} in col {col} to col {possMove} done
+def undoColToCol(app, hintList):
+    cardNum = int(hintList[2])
+    cardSuite = hintList[4]
+    cardCol = int(hintList[7])
+    newCol = int(hintList[10])
+    for card in app.testTableau[newCol]:
+        if cardNum == card.number and cardSuite == card.suite:
+            app.testTableau[newCol].pop()
+            app.testTableau[cardCol].append(card)
+
+# Move the {card.number} of {card.suite} from the stack to col {possMove} done
+def undoStackToCol(app, hintList):
+    newCol = int(hintList[10])
+    card = app.testTableau[newCol][-1]
+    app.testTableau[newCol].pop()
+    app.testDrawnStack.append(card)
+
+# Move the {card.number} of {card.suite} from the stack to foundation {possMove} done
+def undoStackToFoundation(app, hintList):
+    foundCol = int(hintList[10])
+    card = app.testFoundations[foundCol][-1]
+    app.testFoundations[foundCol].pop()
+    app.testDrawnStack.append(card)
+
+def foundationsComplete(app):
+    for col in range(4):
+        if len(app.testFoundations[col]) != 13:
+            return False
+    return True
 
 def undoMove(app):
     pass
