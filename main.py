@@ -1,6 +1,7 @@
 from cmu_graphics import *
 import random
 import copy
+import time
 
 class Card:
     def __init__(self, number, suite, color, image, back):
@@ -61,10 +62,6 @@ def onAppStart(app):
     app.prevTestMoves = []
 
     app.cardGroup = None
-
-    '''app.singleCardSelected = False # implement
-    app.selectedCardInTableau = False # implement
-    app.selectedCardInFoundation = False # implement'''
 
     app.hintLabel = ''
     app.score = 0
@@ -154,11 +151,15 @@ def drawBoard(app):
     drawLabel(f'Time: {app.timer}', 720, 27, size=16, font='monospace', bold=True)
     drawLabel(f'Moves: {app.moves}', 1000, 27, size=16, font='monospace', bold=True)
 
-    # bottom buttons
+    # side buttons
     drawRect(1360, 90, 50, 50, fill='lightSteelBlue', border='black', borderWidth=1)
     drawRect(1360, 165, 50, 50, fill='lightSteelBlue', border='black', borderWidth=1)
     drawLabel('Undo', 1385, 115, fill='black', size=14)
     drawLabel('Hint', 1385, 190, fill='black', size=14)
+
+    # hint label
+    drawRect(500, 60, 450, 20, border='yellow', borderWidth=1, fill=None)
+    drawLabel(f'{app.hintLabel}', 725, 70, size=14)
 
 def redrawAll(app):
     drawImage('/Users/kellyzhou/atla-solitaire/backgrounds/bg.png', 0, 0)
@@ -323,6 +324,10 @@ def onMouseRelease(app, mouseX, mouseY): # call deselect at the end?
         foundationOnRelease(app, mouseX, mouseY)
     else:
         tableauOnRelease(app, mouseX, mouseY)
+    if mouseX >= 1360 and mouseX <= 1410 and mouseY >= 165 and mouseY <= 215:
+        app.moves = app.moves
+    else:
+        app.moves += 1
 
 def cardGroupOnRelease(app, mouseX, mouseY):
     for col in range(7):
@@ -460,18 +465,6 @@ def getHint(app, level):
         app.testFoundations = copy.deepcopy(app.foundations) 
         app.testDrawnStack = copy.deepcopy(app.drawnStack) 
         app.testStack = copy.deepcopy(app.stack)
-        '''app.prevTableau = copy.deepcopy(app.tableau)
-        app.prevFoundations = copy.deepcopy(app.foundations) 
-        app.prevDrawnStack = copy.deepcopy(app.drawnStack)
-        app.prevStack = copy.deepcopy(app.stack)'''
-    '''elif level != -1 and level != 0:
-        app.prevTableau = copy.deepcopy(app.testTableau) 
-        app.prevFoundations = copy.deepcopy(app.foundations) 
-        app.prevDrawnStack = copy.deepcopy(app.drawnStack) 
-        app.testTableau = copy.deepcopy(app.testTableau) 
-        app.testFoundations = copy.deepcopy(app.testFoundations) 
-        app.testDrawnStack = copy.deepcopy(app.testDrawnStack) 
-        app.testStack = copy.deepcopy(app.testStack)'''
     possMoveList = []
     tableauHints = getTableauHints(app)
     stackHints = getStackHints(app)
@@ -482,7 +475,7 @@ def getHint(app, level):
         possMoveList.extend(stackHints)
     if foundationHints != []:
         possMoveList.extend(foundationHints)
-    if (len(app.testStack) != 0) or (len(app.testDrawnStack != 0)):
+    if possMoveList == [] and (len(app.testStack) != 0) or (len(app.testDrawnStack) != 0):
         possMoveList.append('Draw card')
     if possMoveList == [] and len(app.testStack) == 0 and len(app.testDrawnStack == 0):
         possMoveList.append('No moves left')
@@ -612,7 +605,7 @@ def findFoundation(app, card):
 
 def nextBestMove(app, hints, maxNextMoves, bestMove, level=0):
     if len(hints) == 0:
-        print('Best move: ', bestMove, ', Max num moves: ', maxNextMoves)
+        app.hintLabel = f'{bestMove}. Max num next moves: {maxNextMoves}'
         return bestMove
     else:
         currHint = hints[0]
