@@ -4,6 +4,8 @@ import copy
 import time
 
 # make winning screen
+# hint putting stack cards away (is tryMove messing with the actual stack?)
+# if 'no moves left', solvable = None. nextBestMove2()
 
 class Card:
     def __init__(self, number, suite, color, image, back):
@@ -62,6 +64,9 @@ def onAppStart(app):
     app.prevDrawnStack = []
     app.testDrawnStack = []
     app.prevTestMoves = []
+
+    app.selectedCardInStack = False
+    app.selectedCardInFoundation = False
 
     app.cardGroup = None
 
@@ -218,31 +223,6 @@ def resetStack(app):
     app.drawnStack = []
 
 def deselectPrevCard(app):
-    '''if app.cardGroup != None: 
-        app.cardGroup = None
-    else:
-        for col in range(7):
-            for card in app.tableau[col]:
-                if card.selected:
-                    card.selected = False
-                    card.prevLeftTopCornerX = 0
-                    card.prevLeftTopCornerY = 0
-
-    if app.selectedCardInStack == True:
-        app.selectedCardInStack = False
-        for card in app.drawnStack:
-            if card.selected == True:
-                card.selected = False
-                card.prevLeftTopCornerX = 0
-                card.prevLeftTopCornerY = 0
-    if app.selectedCardInOrderedStack == True:
-        app.selectedCardInOrderedStack = False
-        for col in range(4): 
-            for card in app.orderedStacks[col]:
-                if card.selected == True:
-                    card.selected = False
-                    card.prevLeftTopCornerX = 0
-                    card.prevLeftTopCornerY = 0'''
     app.cardGroup = None
     app.selectedCardInStack = False
     app.selectedCardInFoundation = False
@@ -269,25 +249,26 @@ def onMousePress(app, mouseX, mouseY):
         undoMove(app)'''
     if mouseX >= 1360 and mouseX <= 1410 and mouseY >= 165 and mouseY <= 215:
         nextBestMove2(app)
-    deselectPrevCard(app)
-    card = getCard(app, mouseX, mouseY)
-    if card != None:
-        card.selected = True
-        card.prevLeftTopCornerX = card.leftTopCornerX
-        card.prevLeftTopCornerY = card.leftTopCornerY
-    if app.cardGroup != None:
-        for cd in card.cards:
-            cd.selected = True
-            cd.prevLeftTopCornerX = cd.leftTopCornerX
-            cd.prevLeftTopCornerY = cd.leftTopCornerY
-    if card in app.stack:
-        card.leftTopCornerX = 1025
-        card.leftTopCornerY = 90
-        card.prevLeftTopCornerX = 1025
-        card.prevLeftTopCornerY = 90
-        card.showBack = False
-        app.drawnStack.append(card)
-        app.stack.pop()
+    else: 
+        deselectPrevCard(app)
+        card = getCard(app, mouseX, mouseY)
+        if card != None:
+            card.selected = True
+            card.prevLeftTopCornerX = card.leftTopCornerX
+            card.prevLeftTopCornerY = card.leftTopCornerY
+        if app.cardGroup != None:
+            for cd in card.cards:
+                cd.selected = True
+                cd.prevLeftTopCornerX = cd.leftTopCornerX
+                cd.prevLeftTopCornerY = cd.leftTopCornerY
+        if card in app.stack:
+            card.leftTopCornerX = 1025
+            card.leftTopCornerY = 90
+            card.prevLeftTopCornerX = 1025
+            card.prevLeftTopCornerY = 90
+            card.showBack = False
+            app.drawnStack.append(card)
+            app.stack.pop()
 
 def onMouseDrag(app, mouseX, mouseY): 
     if app.cardGroup != None:
@@ -330,30 +311,40 @@ def onMouseRelease(app, mouseX, mouseY): # call deselect at the end?
         app.moves += 1
 
 def cardGroupOnRelease(app, mouseX, mouseY):
+    changed = False
     for col in range(7):
         for card in app.tableau[col]:
             if card == app.cardGroup.cards[0]:
-                    colInd = 0
-                    for (x1, x2) in app.colBounds:
-                        if mouseX >= x1 and mouseX <= x2:
-                            if checkGroupTableauLegality(app, app.cardGroup.cards, colInd) == True: 
-                                for card in app.cardGroup.cards:
-                                    app.tableau[col].pop()
-                                    app.tableau[colInd].append(card)
-                                    card.leftTopCornerX = x1
-                                    card.leftTopCornerY = (len(app.tableau[colInd])-1)*50 + 265 #magic nunbers?
-                                return
-                            else:
-                                app.cardGroup.leftTopCornerX = app.cardGroup.prevLeftTopCornerX
-                                app.cardGroup.leftTopCornerY = app.cardGroup.prevLeftTopCornerX 
-                                for cd in app.cardGroup.cards:
-                                    cd.leftTopCornerX = cd.prevLeftTopCornerX
-                                    cd.leftTopCornerY = cd.prevLeftTopCornerY
-                                return
-                        colInd += 1
+                colInd = 0
+                for (x1, x2) in app.colBounds:
+                    if mouseX >= x1 and mouseX <= x2:
+                        if checkGroupTableauLegality(app, app.cardGroup.cards, colInd) == True: 
+                            for card in app.cardGroup.cards:
+                                app.tableau[col].pop()
+                                app.tableau[colInd].append(card)
+                                card.leftTopCornerX = x1
+                                card.leftTopCornerY = (len(app.tableau[colInd])-1)*50 + 265 #magic nunbers?
+                            changed = True
+                            return
+                        else:
+                            app.cardGroup.leftTopCornerX = app.cardGroup.prevLeftTopCornerX
+                            app.cardGroup.leftTopCornerY = app.cardGroup.prevLeftTopCornerX 
+                            for cd in app.cardGroup.cards:
+                                cd.leftTopCornerX = cd.prevLeftTopCornerX
+                                cd.leftTopCornerY = cd.prevLeftTopCornerY
+                            changed = True
+                            return
+                    colInd += 1
+    if changed == False:
+        app.cardGroup.leftTopCornerX = app.cardGroup.prevLeftTopCornerX
+        app.cardGroup.leftTopCornerY = app.cardGroup.prevLeftTopCornerX 
+        for cd in app.cardGroup.cards:
+            cd.leftTopCornerX = cd.prevLeftTopCornerX
+            cd.leftTopCornerY = cd.prevLeftTopCornerY
 
 def stackCardsOnRelease(app, mouseX, mouseY):
     colInd = 0
+    changed = False
     card = app.drawnStack[-1]
     for (x1, x2) in app.colBounds:
         if mouseX >= x1 and mouseX <= x2 and mouseY < 265 and colInd < 4: # move to 4 rects
@@ -365,6 +356,7 @@ def stackCardsOnRelease(app, mouseX, mouseY):
             else:
                 card.leftTopCornerX = card.prevLeftTopCornerX
                 card.leftTopCornerY = card.prevLeftTopCornerY
+            changed = True
         elif mouseX >= x1 and mouseX <= x2 and mouseY >= 265: # move to tableau
             if checkSingleTableauLegality(app, card, colInd) == True:
                 app.drawnStack.pop()
@@ -374,10 +366,15 @@ def stackCardsOnRelease(app, mouseX, mouseY):
             else:
                 card.leftTopCornerX = card.prevLeftTopCornerX
                 card.leftTopCornerY = card.prevLeftTopCornerY
+            changed = True
         colInd += 1
+    if changed == False:
+        card.leftTopCornerX = card.prevLeftTopCornerX
+        card.leftTopCornerY = card.prevLeftTopCornerY
 
 def foundationOnRelease(app, mouseX, mouseY):
     card = None
+    changed = False
     for stack in range(4):
         if len(app.foundations[stack]) != 0 and app.foundations[stack][-1].selected == True:
             card = app.foundations[stack][-1]
@@ -392,12 +389,19 @@ def foundationOnRelease(app, mouseX, mouseY):
                     else:
                         card.leftTopCornerX = card.prevLeftTopCornerX
                         card.leftTopCornerY = card.prevLeftTopCornerY
+                    changed = True
                 colInd += 1
+    if changed == False:
+        card.leftTopCornerX = card.prevLeftTopCornerX
+        card.leftTopCornerY = card.prevLeftTopCornerY
 
 def tableauOnRelease(app, mouseX, mouseY):
+    changed = False
+    cd = None
     for col in range(7):
         for card in app.tableau[col]:
             if card.selected == True:
+                cd = card
                 colInd = 0
                 for (x1, x2) in app.colBounds:
                     if mouseX >= x1 and mouseX <= x2: # 4 rects 
@@ -410,6 +414,7 @@ def tableauOnRelease(app, mouseX, mouseY):
                             else:
                                 card.leftTopCornerX = card.prevLeftTopCornerX
                                 card.leftTopCornerY = card.prevLeftTopCornerY
+                            changed = True
                             return
                         else: # tableau
                             if checkSingleTableauLegality(app, card, colInd) == True:
@@ -420,8 +425,12 @@ def tableauOnRelease(app, mouseX, mouseY):
                             else:
                                 card.leftTopCornerX = card.prevLeftTopCornerX
                                 card.leftTopCornerY = card.prevLeftTopCornerY
+                            changed = True
                             return
                     colInd += 1
+    if changed == False and cd != None:
+        cd.leftTopCornerX = cd.prevLeftTopCornerX
+        cd.leftTopCornerY = cd.prevLeftTopCornerY
 
 def checkSingleTableauLegality(app, card, colInd):
     if len(app.tableau[colInd]) == 0:
@@ -501,7 +510,7 @@ def getTableauHints(app):
                     hints.append(hintStr)
                     if ((cardInd == 0) and (len(app.testTableau[possMove]) == 0)): # if move is redundant (K -> K)
                         hints.pop()
-            if (card.showBack == False) and (card.number == 1): # if ace
+            if (card.showBack == False) and (card.number == 1) and (card == app.testTableau[col][-1]): # if ace
                 possMove = findEmptyFoundation(app)
                 if possMove != None:
                     hintStr = f'Move the {card.number} of {card.suite} in col {col} to foundation {possMove}'
@@ -689,43 +698,37 @@ def nextBestMove2(app):
     app.testStack = copy.deepcopy(app.stack)
     hints = getHint(app)
     print('ORIG HINTS: ', hints)
-    if len(hints) == 1:
-        bestMove = hints[0]
-    else:
-        bestMove = nextBestMove2Helper(app, hints, hints[0], 0, 0, None)
-    if bestMove == None:
-        bestMove = hints[0]
+    solvable, bestMove = nextBestMove2Helper(app, hints, hints[0], 0, 0, None)
     app.hintLabel = f'{bestMove}'
-    print('BEST MOVE:', bestMove)
+    print('BEST MOVE:', bestMove, 'SOLVABLE: ', solvable)
     return bestMove
 
 def nextBestMove2Helper(app, hints, currHint, drawCardCount, maxLevel, bestHint, level=0): 
-    solution = -1
+    solvable = -1
     if foundationsComplete(app) or allFront(app):
-        return currHint
+        return True, bestHint
     else:
         for hint in hints:
-            print(hint)
             if hint == 'Draw card':
                 drawCardCount += 1
                 if drawCardCount > 24:
                     drawCardCount = 0
-                    solution = None
+                    solvable = False
             if level == 0:
                 currHint = hint
+            if level > maxLevel:
+                maxLevel = level
+                bestHint = (currHint, maxLevel)
             tryMove(app, hint)
             newHints = getHint(app)
             print('LEVEL: ', level, ' HINTS: ', newHints)
-            if solution == -1:
-                solution = nextBestMove2Helper(app, newHints, currHint, drawCardCount, maxLevel, bestHint, level+1)
-            if solution != None and solution != -1:
-                return solution
-            if level > maxLevel:
-                maxLevel = level
-                bestHint = (currHint, level)
+            if solvable == -1:
+                solvable, bestHint = nextBestMove2Helper(app, newHints, currHint, drawCardCount, maxLevel, bestHint, level+1)
+            if solvable != False and solvable != -1:
+                return solvable
             undoTestBoard(app, hint)
             print('undo move')
-        return None 
+        return False, bestHint 
 
 def undoTestBoard(app, hint): 
     hintList = list(hint.split(' '))
