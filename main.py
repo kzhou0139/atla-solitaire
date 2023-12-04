@@ -2,11 +2,10 @@ from cmu_graphics import *
 import random
 import copy
 import time
+import datetime
 
 # make winning screen
 # if 'no moves left', solvable = None. nextBestMove2()
-# change 24 to length of stack
-# if condition for backtracking is wrong 
 
 class Card:
     def __init__(self, number, suite, color, image, back):
@@ -70,7 +69,10 @@ def onAppStart(app):
 
     app.hintLabel = ''
     app.score = 0
-    app.timer = time.perf_counter()
+    app.counter = 30
+    app.timerLabel = '30 seconds'
+    app.stepsPerSecond = 1
+    app.timerActive = False
     app.moves = 0
 
 def getCardDeck(app, file):
@@ -153,12 +155,18 @@ def drawBoard(app):
     # banner
     drawRect(0, 0, 2880, 55, fill='navy', opacity=20)
     drawLabel(f'Score: {app.score}', 400, 27, size=16, font='monospace', bold=True)
-    drawLabel(f'Time: {app.timer}', 720, 27, size=16, font='monospace', bold=True)
+    if app.timerActive == True:
+        drawLabel(f'Time: {app.timerLabel}', 720, 27, size=16, font='monospace', bold=True, fill='red')
+    else:
+        drawLabel(f'Time: {app.timerLabel}', 720, 27, size=16, font='monospace', bold=True, fill='green')
     drawLabel(f'Moves: {app.moves}', 1000, 27, size=16, font='monospace', bold=True)
 
     # side buttons
     drawRect(1360, 90, 50, 50, fill='lightSteelBlue', border='black', borderWidth=1)
-    drawRect(1360, 165, 50, 50, fill='lightSteelBlue', border='black', borderWidth=1)
+    if app.timerActive == True:
+        drawRect(1360, 165, 50, 50, fill='steelBlue', border='black', borderWidth=1)
+    else:
+        drawRect(1360, 165, 50, 50, fill='lightSteelBlue', border='black', borderWidth=1)
     drawLabel('Undo', 1385, 115, fill='black', size=14)
     drawLabel('Hint', 1385, 190, fill='black', size=14)
 
@@ -247,9 +255,11 @@ def onMousePress(app, mouseX, mouseY):
         undoMove(app)'''
     deselectPrevCard(app)
     if mouseX >= 1360 and mouseX <= 1410 and mouseY >= 165 and mouseY <= 215:
-        nextBestMove2(app)
+        if app.timerActive == False:
+            nextBestMove2(app)
+            app.counter = 30
+            app.timerActive = True
     else: 
-        
         card = getCard(app, mouseX, mouseY)
         if card != None:
             card.selected = True
@@ -886,7 +896,7 @@ def undoStackToFoundation(app, hintList):
     app.testFoundations[foundCol].pop()
     app.testDrawnStack.append(card)
 
-'''ef foundationsComplete(app):
+'''def foundationsComplete(app):
     for col in range(4):
         if len(app.testFoundations[col]) != 13:
             return False
@@ -898,6 +908,13 @@ def allFront(app):
             if card.showBack == True:
                 return False
     return True
+
+def onStep(app):
+    if app.timerActive == True:
+        app.counter -= 1
+        app.timerLabel = f'{app.counter} seconds'
+    if app.counter == 0:
+        app.timerActive = False
 
 def main():
     runApp(width=2880, height=1800)
