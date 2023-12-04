@@ -1,8 +1,6 @@
 from cmu_graphics import *
 import random
 import copy
-import time
-import datetime
 
 # make winning screen
 # if 'no moves left', solvable = None. nextBestMove2()
@@ -103,7 +101,7 @@ def initialSetup(app): # set positions of initial tableau
         cardInd = 0
         for card in range(cols+1):
             app.initialTableau[cardCount].leftTopCornerX = (startX%1225)+150
-            app.initialTableau[cardCount].leftTopCornerY = (cardInd*50)+265
+            app.initialTableau[cardCount].leftTopCornerY = (cardInd*50)+275
             app.initialTableau[cardCount].col = cols
             colCards.append(app.initialTableau[cardCount])
             cardCount += 1
@@ -118,6 +116,9 @@ def initialSetup(app): # set positions of initial tableau
 def drawBoard(app):
     startX = 0
     for col in range(7):
+        drawLabel(f'{col}', app.colBounds[col][0]+48, 265, bold=True, fill='black')
+        if col < 4:
+            drawLabel(f'{col}', app.colBounds[col][0]+48, 230, bold=True, fill='black')
         for cardInd in range(len(app.tableau[col])):
             if cardInd == len(app.tableau[col]) - 1:
                 app.tableau[col][cardInd].showBack = False
@@ -623,26 +624,6 @@ def checkIsGroup(app, col, cardInd):
                 return False
     return True
 
-def nextBestMove(app, hints, maxNextMoves, bestMove, level=0):
-    if len(hints) == 0:
-        app.hintLabel = f'{bestMove}. Max num next moves: {maxNextMoves}'
-        return bestMove
-    else:
-        currHint = hints[0]
-        restHints = hints[1:]
-        tryMove(app, currHint)
-        currNextMoves = getHint(app, level+1)
-        print(currHint, currNextMoves, len(currNextMoves))
-        if len(currNextMoves) > maxNextMoves:
-            print(len(currNextMoves))
-            maxNextMoves = len(currNextMoves)
-            bestMove = currHint
-        app.testTableau = copy.deepcopy(app.tableau) # change. depend on what is being updated?
-        app.testFoundations = copy.deepcopy(app.foundations) 
-        app.testDrawnStack = copy.deepcopy(app.drawnStack) 
-        app.testStack = copy.deepcopy(app.stack) 
-        return nextBestMove(app, restHints, maxNextMoves, bestMove, level+1)
-
 def tryMove(app, hint):
     hintList = list(hint.split(' '))
     if len(hintList) == 2: # draw card
@@ -748,7 +729,7 @@ def nextBestMove2(app):
     hints = getHint(app)
     print('ORIG HINTS: ', hints)
     solvable, bestMove = nextBestMove2Helper(app, hints, hints[0], 0, 0, None)
-    app.hintLabel = f'{bestMove}'
+    app.hintLabel = f'{bestMove[0]}'
     print('BEST MOVE:', bestMove, 'SOLVABLE: ', solvable)
     return bestMove
 
