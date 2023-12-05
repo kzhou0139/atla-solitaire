@@ -280,6 +280,7 @@ def onMousePress(app, mouseX, mouseY):
         if len(app.prevMoves) != 0:
             undoBoard(app, app.prevMoves[-1], 'real') 
             app.prevMoves.pop()
+            app.moves += 1
     if mouseX >= 1360 and mouseX <= 1410 and mouseY >= 165 and mouseY <= 215:
         if app.timerActive == False:
             nextBestMove(app)
@@ -306,6 +307,7 @@ def onMousePress(app, mouseX, mouseY):
             app.stack.pop()
             move = 'Draw card'
             app.prevMoves.append(move)
+            app.moves += 1
     return
 
 # moves card / card group around when mouse is dragged
@@ -345,7 +347,6 @@ def onMouseRelease(app, mouseX, mouseY):
         foundationOnRelease(app, mouseX, mouseY)
     else:
         tableauOnRelease(app, mouseX, mouseY)
-    print(app.prevMoves)
 
 # helper function of onMouseRelease(). Legality checks and variable updates when a card group is released (user move)
 def cardGroupOnRelease(app, mouseX, mouseY):
@@ -357,11 +358,11 @@ def cardGroupOnRelease(app, mouseX, mouseY):
                 for (x1, x2) in app.colBounds:
                     if mouseX >= x1 and mouseX <= x2:
                         if checkGroupTableauLegality(app, app.cardGroup.cards, colInd) == True: 
-                            for card in app.cardGroup.cards:
+                            for cd in app.cardGroup.cards:
                                 app.tableau[col].pop()
-                                app.tableau[colInd].append(card)
-                                card.leftTopCornerX = x1
-                                card.leftTopCornerY = (len(app.tableau[colInd])-1)*50 + 275 
+                                app.tableau[colInd].append(cd)
+                                cd.leftTopCornerX = x1
+                                cd.leftTopCornerY = (len(app.tableau[colInd])-1)*50 + 275 
                             move = f'Move the {card.number} of {card.suite} group in col {col} to col {colInd}'
                             app.prevMoves.append(move)
                             changed = True
@@ -790,9 +791,6 @@ def nextBestMove(app):
     hints = getHint(app)
     print('ORIG HINTS: ', hints)
     solvable, bestHint = nextBestMoveHelper(app, hints, hints[0], 0, -1, None)
-    if bestHint == None:
-        print('bestHint none')
-        bestHint = hints[0]
     app.hintLabel = f'{bestHint}'
     print('BEST MOVE:', bestHint)
     return bestHint
@@ -850,25 +848,58 @@ def undoBoard(app, hint, whichSet):
     hintList = list(hint.split(' '))
     if len(hintList) == 2: # draw card
         if len(drawnStack) != 0:
-            card = drawnStack[-1]
-            drawnStack.pop()
-            stack.append(card)
+                card = drawnStack[-1]
+                drawnStack.pop()
+                stack.append(card)
+        '''if whichSet == 'test':
+            if len(app.testDrawnStack) != 0:
+                card = app.testDrawnStack[-1]
+                app.testDrawnStack.pop()
+                app.testStack.append(card)
+        else:
+            if len(app.drawnStack) != 0:
+                card = app.drawnStack[-1]
+                app.drawnStack.pop()
+                app.stack.append(card)'''
     elif len(hintList) == 3:
         pass
     elif len(hintList) == 12:
-        print('hello')
         undoCardGroup(app, hintList, tableau)
+        '''if whichSet == 'test':
+            undoCardGroup(app, hintList, app.testTableau)
+        else:
+            undoCardGroup(app, hintList, app.tableau)'''
     else:
         if hintList[6] == 'foundation': 
             undoFoundationToCol(app, hintList, tableau, foundations) 
+            '''if whichSet == 'test':
+                undoFoundationToCol(app, hintList, app.testTableau, app.testFoundations) 
+            else:
+                undoFoundationToCol(app, hintList, app.tableau, app.foundations)''' 
         elif hintList[6] == 'col' and hintList[9] == 'foundation':
             undoColToFoundation(app, hintList, tableau, foundations)
+            '''if whichSet == 'test':
+                undoColToFoundation(app, hintList, app.testTableau, app.testFoundations)
+            else:
+                undoColToFoundation(app, hintList, app.tableau, app.foundations)'''
         elif hintList[6] == 'col' and hintList[9] == 'col':
             undoColToCol(app, hintList, tableau)
+            '''if whichSet == 'test':
+                undoColToCol(app, hintList, app.testTableau)
+            else:
+                undoColToCol(app, hintList, app.tableau)'''
         elif hintList[7] == 'stack' and hintList[9] == 'col':
             undoStackToCol(app, hintList, tableau, drawnStack)
+            '''if whichSet == 'test':
+                undoStackToCol(app, hintList, app.testTableau, app.testDrawnStack)
+            else:
+                undoStackToCol(app, hintList, app.tableau, app.drawnStack)'''
         elif hintList[7] == 'stack' and hintList[9] == 'foundation':
             undoStackToFoundation(app, hintList, foundations, drawnStack)
+            '''if whichSet == 'test':
+                undoStackToFoundation(app, hintList, app.testFoundations, app.testDrawnStack)
+            else:
+                undoStackToFoundation(app, hintList, app.foundations, app.drawnStack)'''
 
 # helper functino of undoBoard(). undoes a card group move within the tableau (user + computer)
 def undoCardGroup(app, hintList, tableau):
@@ -884,7 +915,6 @@ def undoCardGroup(app, hintList, tableau):
     for card in tableau[newCol]:
         if cardNum == card.number and cardSuite == card.suite:
             cardGroup = tableau[newCol][cardInd:]
-            print('card group: ', cardGroup)
             if ((len(tableau[cardGroupCol]) > 0) and 
                     (tableau[cardGroupCol][-1].number != cardNum+1 or 
                     tableau[cardGroupCol][-1].color == cardColor)):
@@ -928,10 +958,6 @@ def undoColToFoundation(app, hintList, tableau, foundations):
 
 # helper functino of undoBoard(). undoes a single card move within the tableau (user + computer)
 def undoColToCol(app, hintList, tableau):
-    if tableau == 'test':
-        tableau = app.testTableau
-    else:
-        tableau = app.tableau
     cardNum = int(hintList[2])
     cardSuite = hintList[4]
     if cardSuite == 'spades' or cardSuite == 'clubs':
