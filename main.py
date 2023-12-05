@@ -798,7 +798,7 @@ def nextBestMove(app):
 # helper function of nextBestMove()
 # backtracking algorithm to find the best move. best meaning the move that leads to the most number of next possible moves
 def nextBestMoveHelper(app, hints, currHint, drawCardCount, maxLevel, bestHint, level=0): 
-    solvable = -1
+    solvable = True
     if allFront(app):
         return True, bestHint
     else:
@@ -851,55 +851,21 @@ def undoBoard(app, hint, whichSet):
                 card = drawnStack[-1]
                 drawnStack.pop()
                 stack.append(card)
-        '''if whichSet == 'test':
-            if len(app.testDrawnStack) != 0:
-                card = app.testDrawnStack[-1]
-                app.testDrawnStack.pop()
-                app.testStack.append(card)
-        else:
-            if len(app.drawnStack) != 0:
-                card = app.drawnStack[-1]
-                app.drawnStack.pop()
-                app.stack.append(card)'''
     elif len(hintList) == 3:
         pass
     elif len(hintList) == 12:
         undoCardGroup(app, hintList, tableau)
-        '''if whichSet == 'test':
-            undoCardGroup(app, hintList, app.testTableau)
-        else:
-            undoCardGroup(app, hintList, app.tableau)'''
     else:
         if hintList[6] == 'foundation': 
             undoFoundationToCol(app, hintList, tableau, foundations) 
-            '''if whichSet == 'test':
-                undoFoundationToCol(app, hintList, app.testTableau, app.testFoundations) 
-            else:
-                undoFoundationToCol(app, hintList, app.tableau, app.foundations)''' 
         elif hintList[6] == 'col' and hintList[9] == 'foundation':
             undoColToFoundation(app, hintList, tableau, foundations)
-            '''if whichSet == 'test':
-                undoColToFoundation(app, hintList, app.testTableau, app.testFoundations)
-            else:
-                undoColToFoundation(app, hintList, app.tableau, app.foundations)'''
         elif hintList[6] == 'col' and hintList[9] == 'col':
             undoColToCol(app, hintList, tableau)
-            '''if whichSet == 'test':
-                undoColToCol(app, hintList, app.testTableau)
-            else:
-                undoColToCol(app, hintList, app.tableau)'''
         elif hintList[7] == 'stack' and hintList[9] == 'col':
             undoStackToCol(app, hintList, tableau, drawnStack)
-            '''if whichSet == 'test':
-                undoStackToCol(app, hintList, app.testTableau, app.testDrawnStack)
-            else:
-                undoStackToCol(app, hintList, app.tableau, app.drawnStack)'''
         elif hintList[7] == 'stack' and hintList[9] == 'foundation':
             undoStackToFoundation(app, hintList, foundations, drawnStack)
-            '''if whichSet == 'test':
-                undoStackToFoundation(app, hintList, app.testFoundations, app.testDrawnStack)
-            else:
-                undoStackToFoundation(app, hintList, app.foundations, app.drawnStack)'''
 
 # helper functino of undoBoard(). undoes a card group move within the tableau (user + computer)
 def undoCardGroup(app, hintList, tableau):
