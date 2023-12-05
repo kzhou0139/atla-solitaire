@@ -2,16 +2,14 @@ from cmu_graphics import *
 import random
 import copy
 
-# make winning screen
-
 # class for individual cards
 class Card:
-    def __init__(self, number, suite, color, image, back):
+    def __init__(self, number, suite, color, image):
         self.number = number
         self.suite = suite
         self.color = color
         self.image = image
-        self.back = back
+        self.back = 'cards/back.png'
         self.showBack = True
         self.leftTopCornerX = 0
         self.leftTopCornerY = 0
@@ -49,7 +47,6 @@ def onAppStart(app):
     app.drawnStack = []
     app.selectedCardInStack = False
     app.colBounds = [(150, 246), (325, 421), (500, 596), (675, 771), (850, 946), (1025, 1121), (1200, 1296)]
-    
     app.foundations = [ [] for i in range(4) ]
 
     app.tableau = []
@@ -68,12 +65,14 @@ def onAppStart(app):
     app.cardGroup = None
 
     app.hintLabel = ''
-    app.score = 0
+    app.hintsLeft = 3
     app.counter = 30
     app.timerLabel = '30 seconds'
     app.stepsPerSecond = 1
     app.timerActive = False
     app.moves = 0
+
+    app.gameOver = False
 
 # initializes all 52 cards from cards.txt
 def getCardDeck(app, file):
@@ -89,10 +88,8 @@ def getCardDeck(app, file):
                 color = attr
             elif parCount == 3:
                 frontImg = attr
-            elif parCount == 4:
-                backImg = attr
             parCount += 1
-        card = Card(number, suite, color, frontImg, backImg)
+        card = Card(number, suite, color, frontImg)
         app.deck.append(card)
     return app.deck
 
@@ -162,12 +159,12 @@ def drawBoard(app):
 
     # banner
     drawRect(0, 0, 2880, 55, fill='navy', opacity=20)
-    drawLabel(f'Score: {app.score}', 400, 27, size=16, font='monospace', bold=True)
+    drawLabel(f'Hints left: {app.hintsLeft}', 450, 27, size=16, font='monospace', bold=True)
     if app.timerActive == True:
-        drawLabel(f'Time: {app.timerLabel}', 720, 27, size=16, font='monospace', bold=True, fill='red')
+        drawLabel(f'Time: {app.timerLabel}', 770, 27, size=16, font='monospace', bold=True, fill='red')
     else:
-        drawLabel(f'Time: {app.timerLabel}', 720, 27, size=16, font='monospace', bold=True, fill='green')
-    drawLabel(f'Moves: {app.moves}', 1000, 27, size=16, font='monospace', bold=True)
+        drawLabel(f'Time: {app.timerLabel}', 770, 27, size=16, font='monospace', bold=True, fill='green')
+    drawLabel(f'Moves: {app.moves}', 1050, 27, size=16, font='monospace', bold=True)
 
     # side buttons
     if len(app.prevMoves) == 0:
@@ -184,6 +181,11 @@ def drawBoard(app):
     # hint label
     drawRect(500, 60, 450, 20, border='yellow', borderWidth=1, fill=None)
     drawLabel(f'{app.hintLabel}', 725, 70, size=14)
+
+    # game over screen
+    if app.gameOver == True:
+        drawLabel('Congratulations!', 750, 350, size=100, fill='black', bold=True)
+        drawLabel('Game Over', 750, 500, size=100, fill='black', bold=True)
 
 # redraws background and entire board
 def redrawAll(app):
@@ -282,10 +284,11 @@ def onMousePress(app, mouseX, mouseY):
             app.prevMoves.pop()
             app.moves += 1
     if mouseX >= 1360 and mouseX <= 1410 and mouseY >= 165 and mouseY <= 215:
-        if app.timerActive == False:
+        if app.timerActive == False and app.hintsLeft > 0:
             nextBestMove(app)
             app.counter = 30
             app.timerActive = True
+            app.hintsLeft -= 1
     else: 
         card = getCard(app, mouseX, mouseY)
         if card != None:
@@ -347,6 +350,7 @@ def onMouseRelease(app, mouseX, mouseY):
         foundationOnRelease(app, mouseX, mouseY)
     else:
         tableauOnRelease(app, mouseX, mouseY)
+    foundationsFull(app)
 
 # helper function of onMouseRelease(). Legality checks and variable updates when a card group is released (user move)
 def cardGroupOnRelease(app, mouseX, mouseY):
@@ -798,7 +802,7 @@ def nextBestMove(app):
 # helper function of nextBestMove()
 # backtracking algorithm to find the best move. best meaning the move that leads to the most number of next possible moves
 def nextBestMoveHelper(app, hints, currHint, drawCardCount, maxLevel, bestHint, level=0): 
-    solvable = True
+    solvable = -1
     if allFront(app):
         return True, bestHint
     else:
@@ -823,7 +827,7 @@ def nextBestMoveHelper(app, hints, currHint, drawCardCount, maxLevel, bestHint, 
             if solvable != False and solvable != -1:
                 return solvable, bestHint
             undoBoard(app, hint, 'test')
-            print('undo move')
+            #print('undo move')
         return False, bestHint
 
 # resets the test stack if the stack is empty
@@ -834,8 +838,8 @@ def resetTestStack(app):
     app.testDrawnStack = []
 
 # undoes the previous move (user + computer)
-def undoBoard(app, hint, whichSet):  
-    if whichSet == 'test': # computer, test variables
+def undoBoard(app, hint, whichBoard):  
+    if whichBoard == 'test': # computer, test board
         tableau = app.testTableau
         foundations = app.testFoundations
         stack = app.testStack
@@ -845,6 +849,12 @@ def undoBoard(app, hint, whichSet):
         foundations = app.foundations
         stack = app.stack
         drawnStack = app.drawnStack
+    # Move the {card.number} of {card.suite} group in col {col} to col {possMove}
+    # Move the {card.number} of {card.suite} in col {col} to col {possMove}
+    # Move the {card.number} of {card.suite} in col {col} to foundation {possMove}
+    # Move the {card.number} of {card.suite} from the stack to foundation {possMove}
+    # Move the {card.number} of {card.suite} from the stack to col {possMove}
+    # Move the {card.number} of {card.suite} from foundation {col} to col {possMove}
     hintList = list(hint.split(' '))
     if len(hintList) == 2: # draw card
         if len(drawnStack) != 0:
@@ -960,12 +970,20 @@ def undoStackToFoundation(app, hintList, foundations, drawnStack):
     card.leftTopCornerX = 1025
     card.leftTopCornerY = 90
 
-# checks if all cards in the tableau are front-facing
+# checks if all cards in the test tableau are front-facing
 def allFront(app):
     for col in range(7):
         for card in app.testTableau[col]:
             if card.showBack == True:
                 return False
+    return True
+
+# checks if all of the foundations are full
+def foundationsFull(app):
+    for col in range(4):
+        if len(app.foundations[col]) != 13:
+            return False
+    app.gameOver = True
     return True
 
 # runs the program
