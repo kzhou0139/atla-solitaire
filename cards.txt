@@ -1,6 +1,6 @@
 1, spades, black, cards/aceSpades.png, 
 2, spades, black, cards/twoSpades.png, 
-3, spades, black, ards/threeSpades.png, 
+3, spades, black, cards/threeSpades.png, 
 4, spades, black, cards/fourSpades.png, 
 5, spades, black, cards/fiveSpades.png, 
 6, spades, black, cards/sixSpades.png, 
