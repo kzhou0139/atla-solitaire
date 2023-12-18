@@ -20,12 +20,12 @@ The remaining cards that were not dealt into the piles are arranged in a stock p
 
 **Possible moves:**
 
-Move the card from the stack to the foundation
-Move the card from the stack to the tableau
-Move the card from the foundation to the tableau
-Move the card between columns within the tableau
-Move a group of cards between columns within the tableau
-Get hint
-Undo move
+* Move the card from the stack to the foundation
+* Move the card from the stack to the tableau
+* Move the card from the foundation to the tableau
+* Move the card between columns within the tableau
+* Move a group of cards between columns within the tableau
+* Get hint
+* Undo move
 
 **Note:** when moving cards within the tableau, make sure the mouse is placed on the upper half of the card
